@@ -30,7 +30,7 @@ modules/
 ```
 2. Preencha os arquivos ```variables.tf``` no diretório raiz e nos módulos. Adicione três variáveis para cada arquivo: ```region```, ```zone``` e ```project_id```. Como valores padrão, use ```us-east1```, ```us-east1-c``` e seu ID do projeto do Google Cloud.
 ```
-# arquivo variables.tf
+# arquivo variables.tf da raíz.
 
 variable "project_id" {
   description = "The project ID to host the network in"
@@ -113,6 +113,60 @@ terraform init
 > ```
 > terraform show -no-color > instances.tf
 > ```
+> O arquivo instances.tf deverá ficar assim.
+> ```
+># Arrume o arquivo instances.tf
+> 
+> resource "google_compute_instance" "tf-instance-1"{
+>   name         = "tf-instance-1"
+>   machine_type = "ver no lab"
+>   zone         = var.zone
+> 
+>   boot_disk {
+>     initialize_params {
+>       image = "debian-cloud/debian-11"
+>     }
+>   }
+> 
+>   network_interface {
+>     network = "default"
+> 
+>     access_config {
+>       // Ephemeral public IP
+>     }
+>   }
+> 
+> metadata_startup_script = <<-EOT
+>         #!/bin/bash
+>     EOT
+> allow_stopping_for_update = true
+> }
+> > 
+> resource "google_compute_instance" "tf-instance-2"{
+>   name         = "tf-instance-2"
+>   machine_type = "ver no lab"
+>   zone         = var.zone
+> 
+>   boot_disk {
+>     initialize_params {
+>       image = "debian-cloud/debian-11"
+>     }
+>   }
+> 
+>   network_interface {
+>     network = "default"
+> 
+>     access_config {
+>       // Ephemeral public IP
+>     }
+>   }
+> 
+> metadata_startup_script = <<-EOT
+>         #!/bin/bash
+>     EOT
+> allow_stopping_for_update = true
+> }
+> ```
 3. Aplique as alterações. Como você não preencheu todos os argumentos na configuração, o código ```apply``` vai ***atualizar as instâncias atuais***. Essa opção é aceita no laboratório, mas é necessário preencher todos os argumentos corretamente antes da importação em um ambiente de produção.
 > Execute o comando
 > ```
@@ -123,11 +177,84 @@ terraform init
 >> - location = "US"
 >> - force_destroy = true
 >> - uniform_bucket_level_access = true
->>> ***Nota***: Também é possível adicionar valores de saída ao arquivo ```outputs.tf```.
-2. Adicione a referência do módulo ao arquivo ```main.tf```. Inicialize o módulo e aplique (```apply```) as mudanças para criar o bucket usando o Terraform.
+> ```
+> # Arquivo storage.tf
+> resource "google_storage_bucket" "bucket for back-end remote" {
+>   name = var.bucket-back-end
+>   location = "US"
+>   force_destroy = true
+>   uniform_bucket_level_access = true
+> }
+> ```
+> ```
+> #Colocar no final do arquivo variables.tf da raíz.
+> variable "bucket-back-end" {
+>  description = "The name of the bucket for back end"
+>  default     = "seunome-XXX" # ex: "edilson-523"
+> }
+> ```
+> 2. Adicione a referência do módulo ao arquivo ```main.tf```. Inicialize o módulo e aplique (```apply```) as mudanças para criar o bucket usando o Terraform.
 > ```
 > #Colocar no final do arquivo main.tf
 > module "bucket" {
 > 	 source = "./modules/storage"	
 > }
 > ```
+>> ***Nota***: Também é possível adicionar valores de saída ao arquivo ```outputs.tf```.
+> ```
+> # Execute os comandos
+> terraform plan
+> terraform apply
+> ```
+> 3. Configure o bucket de armazenamento como o [back-end remoto](https://www.terraform.io/docs/language/settings/backends/gcs.html) no arquivo ```main.tf```. Para possibilitar a avaliação, use o ***prefixo*** ```terraform/state```.
+> ```
+>
+> ```
+> Inicializar o
+> ```
+terraform init -migrate-state
+> ```
+4. Tarefa 4: modificar e atualizar a infraestrutura
+> - Acesse o módulo ```instances``` e modifique o recurso ***tf-instance-1*** para usar um tipo de máquina ```e2-standard-2```.
+> ```
+>
+> ```
+> - Altere o recurso ***tf-instance-2*** para usar um tipo de máquina ```e2-standard-2```.
+> ```
+> 
+> ```
+> - Adicione um terceiro recurso de instâncias chamado ***Instance Name***. Use um tipo de máquina ```e2-standard-2``` para ele.
+> ```
+># Coloque no final do arquivo instances.tf
+> 
+> resource "google_compute_instance" "tf-instance-name"{
+>   name         = "Instance name"
+>   machine_type = "e2-standard-2"
+>   zone         = var.zone
+> 
+>   boot_disk {
+>     initialize_params {
+>       image = "debian-cloud/debian-11"
+>     }
+>   }
+> 
+>   network_interface {
+>     network = "default"
+> 
+>     access_config {
+>       // Ephemeral public IP
+>     }
+>   }
+> 
+> metadata_startup_script = <<-EOT
+>         #!/bin/bash
+>     EOT
+> allow_stopping_for_update = true
+> }
+> ```
+> - Inicialize o Terraform e aplique (```apply```) as mudanças.
+> ```
+> terraform init
+> terraform apply
+> ```
+>> Nota: Como alternativa, adicione valores de saída aos recursos no arquivo ```outputs.tf``` do módulo.
