@@ -290,4 +290,46 @@ terraform init -migrate-state
 >> - Como essa VPC ***não*** exige intervalos secundários ou rotas associadas, omita essas opções da configuração.
 > 3. Depois de escrever a configuração do módulo, inicialize o Terraform e execute a aplicação (```apply```) para criar as redes.
 > 4. Em seguida, acesse o arquivo ```instances.tf``` e atualize os recursos de configuração para conectar ***tf-instance-1*** a ```subnet-01``` e ***tf-instance-2*** a ```subnet-02```.
+>>   ***Nota***: nessa configuração de instância, você vai precisar atualizar o argumento de ***rede*** para ```VPC Name``` e adicionar o argumento de ***sub-rede*** com a sub-rede certa para cada instância.
 ## Tarefa 7: configurar um firewall
+> 1. Crie um recurso de [regra de firewall](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) chamado ***tf-firewall*** no arquivo ```main.tf```.
+> > - Essa regra de firewall deve permitir que a rede ```VPC Name``` autorize conexões de entrada em todos os intervalos de IP (```0.0.0.0/0```) na ***porta TCP 80***.
+> > - Adicione o argumento ```source_ranges``` com o intervalo de IP correto (```0.0.0.0/0```).
+> > - Inicialize o Terraform e aplique (```apply```) as mudanças.
+> > ***Nota***: para recuperar o argumento ```network``` obrigatório, inspecione o estado e encontre o ***ID*** ou o ***self_link*** do recurso ```google_compute_network``` que você criou. Essa informação fica no formulário ```projects/PROJECT_ID/global/networks/VPC Name```.
+> ```
+> # Colocar no arquivo main.tf
+> 
+> resource "google_compute_firewall" "tf-firewall" {
+>  name    = "tf-firewall"
+>  network = google_compute_network.vpc-module.name
+>  source_ranges = 0.0.0.0/24
+>
+>  allow {
+>    protocol = "icmp"
+>  }
+>
+>  allow {
+>    protocol = "tcp"
+>    ports    = ["80"]
+>  }
+>
+>  source_tags = ["web"]
+>}
+> ```
+## Teste de conectividade (opcional)
+> Depois de criar uma regra de firewall para permitir conexões internas na VPC, é possível executar um teste de conectividade de rede.
+> 1. As duas VMS precisam estar em execução.
+> 2. Acesse ***Network Intelligence > Testes de conectividade***. Faça o teste nas duas VMs para verificar se elas são acessíveis. Depois disso, a conectividade entre as instâncias estará validada.
+> > ***Nota***: veja se a ***API Network Management está ativada***. Caso não esteja, clique em ***Ativar***.
+> Preencha a configuração, como abaixo:
+> > Test name: terrform-network-check
+> > Protocol: tcp
+> > Source
+> > > Source endpoint: VM Instance
+> > > Source VM Instance: tf-instance-1
+> > Destination
+> > > Source endpoint: VM Instance
+> > > Source VM Instance: tf-instance-2
+> > Destination port: 80
+> > Clique em create
