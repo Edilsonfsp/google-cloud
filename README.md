@@ -172,7 +172,7 @@ terraform init
 > ```
 > terraform apply
 > ```
-## 3. Tarefa 3: configurar um back-end remoto
+## Tarefa 3: configurar um back-end remoto
 1. Crie um [recurso de bucket do Cloud Storage](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/storage_bucket) no módulo ```storage```. Para ***nomear*** o bucket, use ***Bucket Name***. Para os outros argumentos, use estes valores:
 >> - location = "US"
 >> - force_destroy = true
@@ -208,24 +208,39 @@ terraform init
 > ```
 > 3. Configure o bucket de armazenamento como o [back-end remoto](https://www.terraform.io/docs/language/settings/backends/gcs.html) no arquivo ```main.tf```. Para possibilitar a avaliação, use o ***prefixo*** ```terraform/state```.
 > ```
+> No seu arquivo colocar entre as chaves do parametro terraform {  ...  }
+> terraform {
 >
+>  # ...
+>  backend "gcs" {
+>    bucket  = var.bucket-back-end
+>    prefix  = "terraform/state"
+>  }
+> # ...
+>
+> }
 > ```
-> Inicializar o
+> 4. Se a configuração estiver correta, após o comando ```init```, o Terraform vai perguntar se você quer copiar os dados de estado para o novo back-end. Digite ```yes``` no prompt.
+> ```
+> # Digite o comando
+> terraform init
+> ```
+> Inicializar o estado
 > ```
 terraform init -migrate-state
 > ```
-4. Tarefa 4: modificar e atualizar a infraestrutura
-> - Acesse o módulo ```instances``` e modifique o recurso ***tf-instance-1*** para usar um tipo de máquina ```e2-standard-2```.
+## Tarefa 4: modificar e atualizar a infraestrutura
+> 1. Acesse o módulo ```instances``` e modifique o recurso ***tf-instance-1*** para usar um tipo de máquina ```e2-standard-2```.
 > ```
 >
 > ```
-> - Altere o recurso ***tf-instance-2*** para usar um tipo de máquina ```e2-standard-2```.
+> 2. Altere o recurso ***tf-instance-2*** para usar um tipo de máquina ```e2-standard-2```.
 > ```
 > 
 > ```
-> - Adicione um terceiro recurso de instâncias chamado ***Instance Name***. Use um tipo de máquina ```e2-standard-2``` para ele.
+> 3 Adicione um terceiro recurso de instâncias chamado ***Instance Name***. Use um tipo de máquina ```e2-standard-2``` para ele.
 > ```
-># Coloque no final do arquivo instances.tf
+> # Coloque no final do arquivo instances.tf
 > 
 > resource "google_compute_instance" "tf-instance-name"{
 >   name         = "Instance name"
@@ -252,9 +267,27 @@ terraform init -migrate-state
 > allow_stopping_for_update = true
 > }
 > ```
-> - Inicialize o Terraform e aplique (```apply```) as mudanças.
+> 4 Inicialize o Terraform e aplique (```apply```) as mudanças.
 > ```
 > terraform init
 > terraform apply
 > ```
 >> Nota: Como alternativa, adicione valores de saída aos recursos no arquivo ```outputs.tf``` do módulo.
+## Tarefa 5: usar taint e destruir recursos
+> 1. [Use taint](https://www.terraform.io/docs/cli/commands/taint.html) na terceira instância ***Instance Name***. Em seguida, planeje (```plan```) e aplique (```apply```) as mudanças para recriá-la.
+> ```
+> terraform taint google_compute_instance.tf-instance-name
+> ```
+> 3. Remova o recurso do arquivo de configuração para destruir a terceira instância ***Instance Name***. Depois disso, inicialize o Terraform e aplique (```apply```) as mudanças.
+>> Apague as referências da ***Instance Name*** do módulo ```instances.tf```.
+## Tarefa 6: usar um módulo do Registry
+> 1. No Terraform Registry, procure o [Módulo de rede](https://registry.terraform.io/modules/terraform-google-modules/network/google/3.4.0).
+> 2. Adicione o módulo ao arquivo ```main.tf```. Use as configurações a seguir:
+>> - Utilize a versão ```3.4.0```. Outras versões podem gerar erros de compatibilidade.
+>> - Nomeie a VPC como ```VPC Name``` e use o modo de roteamento ***global***.
+>> - Especifique ***duas*** sub-redes na região ```us-east1``` chamadas de ```subnet-01``` e ```subnet-02```. Para os argumentos de sub-rede, é necessário incluir um ***Nome***, um ***IP*** e uma ***Região***.
+>> - Use o IP ```10.10.10.0/24``` para ```subnet-01``` e ```10.10.20.0/24``` para ```subnet-02```.
+>> - Como essa VPC ***não*** exige intervalos secundários ou rotas associadas, omita essas opções da configuração.
+> 3. Depois de escrever a configuração do módulo, inicialize o Terraform e execute a aplicação (```apply```) para criar as redes.
+> 4. Em seguida, acesse o arquivo ```instances.tf``` e atualize os recursos de configuração para conectar ***tf-instance-1*** a ```subnet-01``` e ***tf-instance-2*** a ```subnet-02```.
+## Tarefa 7: configurar um firewall
