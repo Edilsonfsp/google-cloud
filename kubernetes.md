@@ -28,30 +28,23 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 ## Ambiente
 Cole o link da figura aqui
 ## Tarefa 1. crie a VPC de desenvolvimento manualmente
+> No Console do Google Cloud, no ***Menu de navegação***, clique em ***Redes > VPCs***.
 > Crie uma VPC chamada ```griffin-dev-vpc``` com as seguintes sub-redes:
 > - ```griffin-dev-wp```
 > - Bloco de endereços IP: ```192.168.16.0/20```
 > - ```griffin-dev-mgmt```
 > - Bloco de endereços IP: ```192.168.32.0/20```
+## Tarefa 2. Crie o VPC de produção manualmente
+> Crie uma VPC chamada ```griffin-prod-vpc``` com as seguintes sub-redes:
+> - ```griffin-prod-wp```
+> - Bloco de endereços IP: ```192.168.48.0/20```
+> - ```griffin-prod-mgmt```
+> - Bloco de endereços IP: ```192.168.64.0/20```
 
 
 
 
-1. No Cloud Shell, crie seus arquivos de configuração do Terraform e uma estrutura de diretórios como esta:
-```
-main.tf
-variables.tf
-modules/
-└── instances
-    ├── instances.tf
-    ├── outputs.tf
-    └── variables.tf
-└── storage
-    ├── storage.tf
-    ├── outputs.tf
-    └── variables.tf
-```
-Crie a variáveis de ambiente do projeto e da zona
+a variáveis de ambiente do projeto e da zona
 ```
 # Digite os comandos
 $VA_PROJECT_ID = cole aqui o ID do seu projeto.
