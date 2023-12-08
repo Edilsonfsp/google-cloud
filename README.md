@@ -90,7 +90,6 @@ terraform init
 > # instances.tf
 > resource "google_compute_instance" "instance-1" {
 >    name = var.name-instance-1
->    id = var.id-instance-1
 >    machine_type = var.machine-type
 >
 >    boot_disk {
@@ -113,7 +112,6 @@ terraform init
 >
 > resource "google_compute_instance" "instance-2" {
 >    name = var.name-instance-1
->    id 	 = var.id-instance-1
 >    machine_type = var.machine-type
 >
 >   boot_disk {
@@ -320,7 +318,7 @@ terraform init -migrate-state
 ## Tarefa 5: usar taint e destruir recursos
 > 1. [Use taint](https://www.terraform.io/docs/cli/commands/taint.html) na terceira instância ***Instance Name***. Em seguida, planeje (```plan```) e aplique (```apply```) as mudanças para recriá-la.
 > ```
-> terraform taint google_compute_instance.tf-instance-name
+> terraform taint module.instances.google_compute_instance.tf-instance-120317
 > ```
 > 3. Remova o recurso do arquivo de configuração para destruir a terceira instância ***Instance Name***. Depois disso, inicialize o Terraform e aplique (```apply```) as mudanças.
 >> Apague as referências da ***Instance Name*** do módulo ```instances.tf```.
@@ -332,6 +330,29 @@ terraform init -migrate-state
 >> - Especifique ***duas*** sub-redes na região ```us-east1``` chamadas de ```subnet-01``` e ```subnet-02```. Para os argumentos de sub-rede, é necessário incluir um ***Nome***, um ***IP*** e uma ***Região***.
 >> - Use o IP ```10.10.10.0/24``` para ```subnet-01``` e ```10.10.20.0/24``` para ```subnet-02```.
 >> - Como essa VPC ***não*** exige intervalos secundários ou rotas associadas, omita essas opções da configuração.
+>> ```
+>>#Colocar no final do arquivo main.tf
+module "vpc-module" {
+  source       = "terraform-google-modules/network/google"
+  version      = "~> 3.4.0"
+  project_id   = var.project_id
+  network_name = "VPC Name"
+  mtu          = 1460
+
+  subnets = [
+    {
+      subnet_name   = "subnet-01"
+      subnet_ip     = "10.10.10.0/24"
+      subnet_region = "us-east1"
+    },
+    {
+      subnet_name           = "subnet-02"
+      subnet_ip             = "10.10.20.0/24"
+      subnet_region         = "us-east1"
+    }
+  ]
+}
+>> ``` 
 > 3. Depois de escrever a configuração do módulo, inicialize o Terraform e execute a aplicação (```apply```) para criar as redes.
 > 4. Em seguida, acesse o arquivo ```instances.tf``` e atualize os recursos de configuração para conectar ***tf-instance-1*** a ```subnet-01``` e ***tf-instance-2*** a ```subnet-02```.
 >>   ***Nota***: nessa configuração de instância, você vai precisar atualizar o argumento de ***rede*** para ```VPC Name``` e adicionar o argumento de ***sub-rede*** com a sub-rede certa para cada instância.
