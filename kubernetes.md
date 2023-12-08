@@ -98,3 +98,8 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 > 4. Após criar a implantação do WordPress, crie o serviço usando o arquivo ```wp-service.yaml```.
 > 5. Após criar o balanceador de carga, visite o site e verifique se o instalador de site do WordPress aparece. Agora a equipe de desenvolvimento pode terminar a instalação e você pode passar para a próxima tarefa.
 > > ![Tela inicial do Wordpress!](assets/wordpress_tela_inicial.png "Tela inicial de configuração do Wordpress")
+## Tarefa 8. ative o monitoramento
+> Crie uma verificação de tempo de atividade para o site de desenvolvimento do WordPress.
+## Tarefa 9. conceda acesso a outro engenheiro
+> Outro engenheiro entrou para a equipe e precisa ter acesso ao projeto. Conceda a ele o papel de editor no projeto.
+> A segunda conta de usuário do laboratório representa esse engenheiro.
