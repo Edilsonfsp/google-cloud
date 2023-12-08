@@ -88,7 +88,51 @@ terraform init
 > - Em seguida, escreva as configurações do recurso no arquivo instances.tf para corresponder às instâncias atuais.
 > ```
 > # instances.tf
-> resource "google_compute_instance" "instances"{ }
+> resource "google_compute_instance" "instance-1" {
+>    name = var.name-instance-1
+>    id = var.id-instance-1
+>    machine_type = var.machine-type
+>
+>    boot_disk {
+>        initialize_params {
+>        image = var.image
+>        }
+>    }
+>    metadata_startup_script = <<-EOT
+>            #!/bin/bash
+>        EOT
+>    allow_stopping_for_update = true
+>
+>    network_interface {
+>    network = var.network
+>
+>    access_config {
+>    }
+>  }
+>}
+>
+> resource "google_compute_instance" "instance-2" {
+>    name = var.name-instance-1
+>    id 	 = var.id-instance-1
+>    machine_type = var.machine-type
+>
+>   boot_disk {
+>        initialize_params {
+>        image = var.image
+>        }
+>    }
+>    metadata_startup_script = <<-EOT
+>            #!/bin/bash
+>        EOT
+>    allow_stopping_for_update = true
+>
+>    network_interface {
+>    network = var.network
+>
+>    access_config {
+>    }
+>  }
+>}
 > ```
 > - Em seguida, escreva as configurações do [recurso](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance)  no arquivo ```instances.tf``` para corresponder às instâncias atuais.
 > >    -  Dê às instâncias os nomes ```tf-instance-1``` e ```tf-instance-2```.
@@ -102,8 +146,8 @@ terraform init
 > - Depois de escrever as configurações do recurso no módulo, use o comando ```terraform import``` e importe essas preferências para o módulo ```instances```.
 > Execute o comando
 > ```
-> terraform import google_compute_instance.instances {{tf-instance-1}}
-> terraform import google_compute_instance.instances {{tf-instance-2}}
+> terraform import module.instances.google_compute_instance.instance-1 qwiklabs-gcp-03-2d5bb68a8349/us-west1-c/tf-instance-1
+> terraform import module.instances.google_compute_instance.instance-2 qwiklabs-gcp-03-2d5bb68a8349/us-west1-c/tf-instance-2
 > ```
 > Verifique se as instâncias foram importadas para o estado do Terraform:
 > ```
