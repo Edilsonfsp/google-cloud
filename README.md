@@ -28,6 +28,14 @@ modules/
     ├── outputs.tf
     └── variables.tf
 ```
+Crie a variáveis de ambiente do projeto e da zona
+```
+# Digite os comandos
+$VA_PROJECT_ID = cole aqui o ID do seu projeto.
+$VA_ZONE = cole a zone do seu projeto.
+echo $VA_PROJECT_ID
+echo $VA_ZONE
+```
 2. Preencha os arquivos ```variables.tf``` no diretório raiz e nos módulos. Adicione três variáveis para cada arquivo: ```region```, ```zone``` e ```project_id```. Como valores padrão, use ```us-east1```, ```us-east1-c``` e seu ID do projeto do Google Cloud.
 ```
 # arquivo variables.tf da raíz.
@@ -86,52 +94,6 @@ terraform init
 > }
 > ```
 > - Em seguida, escreva as configurações do recurso no arquivo instances.tf para corresponder às instâncias atuais.
-> ```
-> # instances.tf
-> resource "google_compute_instance" "instance-1" {
->    name = var.name-instance-1
->    machine_type = var.machine-type
->
->    boot_disk {
->        initialize_params {
->        image = var.image
->        }
->    }
->    metadata_startup_script = <<-EOT
->            #!/bin/bash
->        EOT
->    allow_stopping_for_update = true
->
->    network_interface {
->    network = var.network
->
->    access_config {
->    }
->  }
->}
->
-> resource "google_compute_instance" "instance-2" {
->    name = var.name-instance-1
->    machine_type = var.machine-type
->
->   boot_disk {
->        initialize_params {
->        image = var.image
->        }
->    }
->    metadata_startup_script = <<-EOT
->            #!/bin/bash
->        EOT
->    allow_stopping_for_update = true
->
->    network_interface {
->    network = var.network
->
->    access_config {
->    }
->  }
->}
-> ```
 > - Em seguida, escreva as configurações do [recurso](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance)  no arquivo ```instances.tf``` para corresponder às instâncias atuais.
 > >    -  Dê às instâncias os nomes ```tf-instance-1``` e ```tf-instance-2```.
 > >    -  Neste laboratório, a configuração do recurso deve ser mínima. Para isso, você vai precisar incluir estes argumentos extras na configuração: ```machine_type```, ```boot_disk```, ```network_interface```, ```metadata_startup_script``` e ```allow_stopping_for_update```. No caso dos últimos dois argumentos, use a configuração a seguir para que não seja necessário recriá-la:
@@ -141,11 +103,62 @@ terraform init
 > >     EOT
 > > allow_stopping_for_update = true
 > > ```
+> ```
+> # instances.tf
+> 
+> resource "google_compute_instance" "instance-1" {
+>    name = tf-instance-1
+>    machine_type = "e2-micro"
+>
+>    boot_disk {
+>        initialize_params {
+>        image = "debian-cloud/debian-11"
+>        }
+>    }
+> 
+>    metadata_startup_script = <<-EOT
+>            #!/bin/bash
+>        EOT
+> 
+>    allow_stopping_for_update = true
+>
+>    network_interface {
+>      network = "default"
+>
+>    access_config {
+>    }
+>  }
+>}
+>
+> resource "google_compute_instance" "instance-2" {
+>    name = tf-instance-2
+>    machine_type = "e2-micro"
+>
+>   boot_disk {
+>        initialize_params {
+>        image = "debian-cloud/debian-11"
+>        }
+>    }
+> 
+>    metadata_startup_script = <<-EOT
+>            #!/bin/bash
+>        EOT
+> 
+>    allow_stopping_for_update = true
+>
+>    network_interface {
+>      network = "default"
+>
+>    access_config {
+>    }
+>  }
+>}
+> ```
 > - Depois de escrever as configurações do recurso no módulo, use o comando ```terraform import``` e importe essas preferências para o módulo ```instances```.
 > Execute o comando
 > ```
-> terraform import module.instances.google_compute_instance.instance-1 qwiklabs-gcp-03-2d5bb68a8349/us-west1-c/tf-instance-1
-> terraform import module.instances.google_compute_instance.instance-2 qwiklabs-gcp-03-2d5bb68a8349/us-west1-c/tf-instance-2
+> terraform import module.instances.google_compute_instance.instance-1 $VA_PROJECT_ID/$VA_ZONE/tf-instance-1
+> terraform import module.instances.google_compute_instance.instance-2 $VA_PROJECT_ID/$VA_ZONE/tf-instance-2
 > ```
 > Verifique se as instâncias foram importadas para o estado do Terraform:
 > ```
