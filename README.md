@@ -331,27 +331,28 @@ terraform init -migrate-state
 >> - Use o IP ```10.10.10.0/24``` para ```subnet-01``` e ```10.10.20.0/24``` para ```subnet-02```.
 >> - Como essa VPC ***não*** exige intervalos secundários ou rotas associadas, omita essas opções da configuração.
 >> ```
->>#Colocar no final do arquivo main.tf
-module "vpc-module" {
-  source       = "terraform-google-modules/network/google"
-  version      = "~> 3.4.0"
-  project_id   = var.project_id
-  network_name = "VPC Name"
-  mtu          = 1460
-
-  subnets = [
-    {
-      subnet_name   = "subnet-01"
-      subnet_ip     = "10.10.10.0/24"
-      subnet_region = "us-east1"
-    },
-    {
-      subnet_name           = "subnet-02"
-      subnet_ip             = "10.10.20.0/24"
-      subnet_region         = "us-east1"
-    }
-  ]
-}
+>> #Colocar no final do arquivo main.tf
+>> 
+>>  module "vpc-module" {
+>>  source        = "terraform-google-modules/network/google"
+>>   version      = "~> 3.4.0"
+>>   project_id   = var.project_id
+>>   network_name = "VPC Name"
+>>   mtu          = 1460
+>> 
+>>   subnets = [
+>>     {
+>>       subnet_name   = "subnet-01"
+>>       subnet_ip     = "10.10.10.0/24"
+>>       subnet_region = var.zone
+>>     },
+>>     {
+>>       subnet_name   = "subnet-02"
+>>       subnet_ip     = "10.10.20.0/24"
+>>       subnet_region = var.zone
+>>     }
+>>   ]
+>> }
 >> ``` 
 > 3. Depois de escrever a configuração do módulo, inicialize o Terraform e execute a aplicação (```apply```) para criar as redes.
 > 4. Em seguida, acesse o arquivo ```instances.tf``` e atualize os recursos de configuração para conectar ***tf-instance-1*** a ```subnet-01``` e ***tf-instance-2*** a ```subnet-02```.
@@ -368,7 +369,6 @@ module "vpc-module" {
 > resource "google_compute_firewall" "tf-firewall" {
 >  name    = "tf-firewall"
 >  network = google_compute_network.vpc-module.name
->  source_ranges = 0.0.0.0/24
 >
 >  allow {
 >    protocol = "icmp"
@@ -380,6 +380,8 @@ module "vpc-module" {
 >  }
 >
 >  source_tags = ["web"]
+> 
+>  source_ranges = [0.0.0.0/24]
 >}
 > ```
 ## Teste de conectividade (opcional)
