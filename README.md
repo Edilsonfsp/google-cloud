@@ -44,9 +44,9 @@ cd storage
 touch storage.tf
 touch outputs.tf
 touch variables.tf
-cd
+cd ~/
 ```
-Crie a variáveis de ambiente do projeto e da zona (REtirar se nao for necessário)
+Crie a variáveis de ambiente do projeto e da zona 
 ```
 # Digite os comandos
 $VA_PROJECT_ID = cole aqui o ID do seu projeto.
@@ -168,26 +168,12 @@ terraform init
 >}
 > ```
 > - Depois de escrever as configurações do recurso no módulo, use o comando ```terraform import``` e importe essas preferências para o módulo ```instances```.
-> Execute o comando
-> ```
-> terraform import module.instances.google_compute_instance.tf-instance-1 < Cole aqui o instance id 1>
 > 
-> terraform import module.instances.google_compute_instance.tf-instance-2 qwiklabs-gcp-00-288e0c3c722f/us-east1-c/tf-instance-2
-> terraform import module.instances.google_compute_instance.tf-instance-2 < Cole aqui o instance id 2>
-> ```
-> Verifique se as instâncias foram importadas para o estado do Terraform:
-> ```
-> terraform show
-> ```
-> Copie o estado do Terraform para o arquivo instances.tf:
-> ```
-> terraform show -no-color > ./modules/instances/instances.tf
-> ```
 > O arquivo instances.tf deverá ficar assim.
 > ```
-># Arrume o arquivo instances.tf (Retirar se não for necessario)
+># o arquivo instances.tf 
 > 
-> resource "google_compute_instance" "tf-instance-1"{
+> resource "google_compute_instance" "tf-instance-1" {
 >   name         = "tf-instance-1"
 >   machine_type = "ver no lab"
 >   zone         = var.zone
@@ -206,13 +192,13 @@ terraform init
 >     }
 >   }
 > 
-> metadata_startup_script = <<-EOT
+>   metadata_startup_script = <<-EOT
 >         #!/bin/bash
 >     EOT
-> allow_stopping_for_update = true
+>   allow_stopping_for_update = true
 > }
 > > 
-> resource "google_compute_instance" "tf-instance-2"{
+> resource "google_compute_instance" "tf-instance-2" {
 >   name         = "tf-instance-2"
 >   machine_type = "ver no lab"
 >   zone         = var.zone
@@ -231,15 +217,25 @@ terraform init
 >     }
 >   }
 > 
-> metadata_startup_script = <<-EOT
+>   metadata_startup_script = <<-EOT
 >         #!/bin/bash
 >     EOT
-> allow_stopping_for_update = true
+>   allow_stopping_for_update = true
 > }
 > ```
+> Depois de preencher o arquivo instances.tf Execute o comando para importar as instancias
+> ```
+> terraform import module.instances.google_compute_instance.tf-instance-1 < Cole aqui o instance id 1>
+> terraform import module.instances.google_compute_instance.tf-instance-2 < Cole aqui o instance id 2>
+> 
+> terraform import module.instances.google_compute_instance.tf-instance-2 projects/< copie e cole project copie do lab >/us-east1-c/instances/tf-instance-2
+> terraform import module.instances.google_compute_instance.tf-instance-2 projects/< copie e cole project copie do lab >/us-east1-c/instances/tf-instance-2
+>
+> ``` 
 3. Aplique as alterações. Como você não preencheu todos os argumentos na configuração, o código ```apply``` vai ***atualizar as instâncias atuais***. Essa opção é aceita no laboratório, mas é necessário preencher todos os argumentos corretamente antes da importação em um ambiente de produção.
 > Execute o comando
 > ```
+> terraform plan
 > terraform apply
 > ```
 ## Tarefa 3: configurar um back-end remoto
