@@ -28,7 +28,25 @@ modules/
     ├── outputs.tf
     └── variables.tf
 ```
-Crie a variáveis de ambiente do projeto e da zona
+```
+touch main.tf
+touch variables.tf
+mkdir modules
+cd modules
+mkdir instances
+cd intances
+touch intances.tf
+touch outputs.tf
+touch variables.tf
+cd ..
+mkdir storage
+cd storage
+touch storage.tf
+touch outputs.tf
+touch variables.tf
+cd
+```
+Crie a variáveis de ambiente do projeto e da zona (REtirar se nao for necessário)
 ```
 # Digite os comandos
 $VA_PROJECT_ID = cole aqui o ID do seu projeto.
@@ -38,7 +56,7 @@ echo $VA_ZONE
 ```
 2. Preencha os arquivos ```variables.tf``` no diretório raiz e nos módulos. Adicione três variáveis para cada arquivo: ```region```, ```zone``` e ```project_id```. Como valores padrão, use ```us-east1```, ```us-east1-c``` e seu ID do projeto do Google Cloud.
 ```
-# arquivo variables.tf da raíz.
+# arquivo variables.tf colocar no três arquivos.
 
 variable "project_id" {
   description = "The project ID to host the network in"
@@ -93,6 +111,9 @@ terraform init
 > 	 source = "./modules/instances"	
 > }
 > ```
+> ```
+> terraform init
+>  ```
 > - Em seguida, escreva as configurações do recurso no arquivo instances.tf para corresponder às instâncias atuais.
 > - Em seguida, escreva as configurações do [recurso](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_instance)  no arquivo ```instances.tf``` para corresponder às instâncias atuais.
 > >    -  Dê às instâncias os nomes ```tf-instance-1``` e ```tf-instance-2```.
@@ -106,9 +127,10 @@ terraform init
 > ```
 > # instances.tf
 > 
-> resource "google_compute_instance" "instance-1" {
+> resource "google_compute_instance" "tf-instance-1" {
 >    name = tf-instance-1
 >    machine_type = "e2-micro"
+>    zone = var.zone
 >
 >    boot_disk {
 >        initialize_params {
@@ -116,49 +138,42 @@ terraform init
 >        }
 >    }
 > 
+>    network_interface {
+>      network = "default"
+>   }
 >    metadata_startup_script = <<-EOT
 >            #!/bin/bash
 >        EOT
-> 
 >    allow_stopping_for_update = true
->
->    network_interface {
->      network = "default"
->
->    access_config {
->    }
->  }
 >}
 >
-> resource "google_compute_instance" "instance-2" {
+> resource "google_compute_instance" "tf-instance-2" {
 >    name = tf-instance-2
 >    machine_type = "e2-micro"
+>    zone = var.zone
 >
 >   boot_disk {
 >        initialize_params {
 >        image = "debian-cloud/debian-11"
 >        }
 >    }
-> 
->    metadata_startup_script = <<-EOT
->            #!/bin/bash
->        EOT
-> 
->    allow_stopping_for_update = true
 >
 >    network_interface {
 >      network = "default"
->
->    access_config {
->    }
->  }
+>   }
+>    metadata_startup_script = <<-EOT
+>            #!/bin/bash
+>        EOT
+>    allow_stopping_for_update = true
 >}
 > ```
 > - Depois de escrever as configurações do recurso no módulo, use o comando ```terraform import``` e importe essas preferências para o módulo ```instances```.
 > Execute o comando
 > ```
-> terraform import module.instances.google_compute_instance.instance-1 $VA_PROJECT_ID/$VA_ZONE/tf-instance-1
+> terraform import module.instances.google_compute_instance.instance-1 < Cole aqui o instance id 1>
+> 
 > terraform import module.instances.google_compute_instance.instance-2 $VA_PROJECT_ID/$VA_ZONE/tf-instance-2
+> terraform import module.instances.google_compute_instance.instance-2 < Cole aqui o instance id 2>
 > ```
 > Verifique se as instâncias foram importadas para o estado do Terraform:
 > ```
@@ -166,7 +181,7 @@ terraform init
 > ```
 > Copie o estado do Terraform para o arquivo instances.tf:
 > ```
-> terraform show -no-color > instances.tf
+> terraform show -no-color > ./modules/instances/instances.tf
 > ```
 > O arquivo instances.tf deverá ficar assim.
 > ```
@@ -174,6 +189,8 @@ terraform init
 > 
 > resource "google_compute_instance" "tf-instance-1"{
 >   name         = "tf-instance-1"
+> id                        = "projects/qwiklabs-gcp-02-355d3386e37a/zones/us-east1-d/instances/tf-instance-2"
+>    instance_id               = 886100697468763877
 >   machine_type = "ver no lab"
 >   zone         = var.zone
 > 
@@ -235,40 +252,34 @@ terraform init
 > ```
 > # Arquivo storage.tf
 > resource "google_storage_bucket" "bucket for back-end remote" {
->   name = var.bucket-back-end
+>   name = < O nome fornecido no Lab >
 >   location = "US"
 >   force_destroy = true
 >   uniform_bucket_level_access = true
 > }
 > ```
-> ```
-> #Colocar no final do arquivo variables.tf da raíz.
-> variable "bucket-back-end" {
->  description = "The name of the bucket for back end"
->  default     = "seunome-XXX" # ex: "edilson-523"
-> }
-> ```
 > 2. Adicione a referência do módulo ao arquivo ```main.tf```. Inicialize o módulo e aplique (```apply```) as mudanças para criar o bucket usando o Terraform.
 > ```
 > #Colocar no final do arquivo main.tf
-> module "bucket" {
+> module "storage" {
 > 	 source = "./modules/storage"	
 > }
 > ```
 >> ***Nota***: Também é possível adicionar valores de saída ao arquivo ```outputs.tf```.
 > ```
 > # Execute os comandos
+> terraform init
 > terraform plan
 > terraform apply
 > ```
 > 3. Configure o bucket de armazenamento como o [back-end remoto](https://www.terraform.io/docs/language/settings/backends/gcs.html) no arquivo ```main.tf```. Para possibilitar a avaliação, use o ***prefixo*** ```terraform/state```.
 > ```
-> No seu arquivo colocar entre as chaves do parametro terraform {  ...  }
+> No arquivo main.tf colocar entre as chaves do parametro terraform {  ...  }
 > terraform {
 >
 >  # ...
 >  backend "gcs" {
->    bucket  = var.bucket-back-end
+>    bucket  = < O nome fornecido no Lab >
 >    prefix  = "terraform/state"
 >  }
 > # ...
@@ -280,25 +291,25 @@ terraform init
 > # Digite o comando
 > terraform init
 > ```
-> Inicializar o estado
+> Inicializar o estado (Retirar se não for necessário)
 > ```
 terraform init -migrate-state
 > ```
 ## Tarefa 4: modificar e atualizar a infraestrutura
 > 1. Acesse o módulo ```instances``` e modifique o recurso ***tf-instance-1*** para usar um tipo de máquina ```e2-standard-2```.
 > ```
->
+> machine_type = "e2-standard-2"
 > ```
 > 2. Altere o recurso ***tf-instance-2*** para usar um tipo de máquina ```e2-standard-2```.
 > ```
-> 
+> machine_type = "e2-standard-2"
 > ```
 > 3 Adicione um terceiro recurso de instâncias chamado ***Instance Name***. Use um tipo de máquina ```e2-standard-2``` para ele.
 > ```
 > # Coloque no final do arquivo instances.tf
 > 
-> resource "google_compute_instance" "tf-instance-name"{
->   name         = "Instance name"
+> resource "google_compute_instance" "tf-instance-3"{
+>   name         = "< Nome fornecido no lab >"
 >   machine_type = "e2-standard-2"
 >   zone         = var.zone
 > 
@@ -331,7 +342,12 @@ terraform init -migrate-state
 ## Tarefa 5: usar taint e destruir recursos
 > 1. [Use taint](https://www.terraform.io/docs/cli/commands/taint.html) na terceira instância ***Instance Name***. Em seguida, planeje (```plan```) e aplique (```apply```) as mudanças para recriá-la.
 > ```
-> terraform taint module.instances.google_compute_instance.tf-instance-120317
+> terraform taint module.instances.google_compute_instance.tf-instance-3
+> ```
+> Remova a configuração do resource da tf-instance-3 do arquivo instances.tf
+> ```
+>terraform plan
+> terraform init
 > ```
 > 3. Remova o recurso do arquivo de configuração para destruir a terceira instância ***Instance Name***. Depois disso, inicialize o Terraform e aplique (```apply```) as mudanças.
 >> Apague as referências da ***Instance Name*** do módulo ```instances.tf```.
@@ -346,30 +362,41 @@ terraform init -migrate-state
 >> ```
 >> #Colocar no final do arquivo main.tf
 >> 
->>  module "vpc-module" {
->>  source        = "terraform-google-modules/network/google"
+>>  module "vpc" {
+>>   source        = "terraform-google-modules/network/google"
 >>   version      = "~> 3.4.0"
 >>   project_id   = var.project_id
->>   network_name = "VPC Name"
+>>   network_name = "< Nome fornecido no lab >"
+>>   routing_mode = "GLOBAL"
 >>   mtu          = 1460
 >> 
 >>   subnets = [
 >>     {
 >>       subnet_name   = "subnet-01"
 >>       subnet_ip     = "10.10.10.0/24"
->>       subnet_region = var.zone
+>>       subnet_region = var.region
 >>     },
 >>     {
 >>       subnet_name   = "subnet-02"
 >>       subnet_ip     = "10.10.20.0/24"
->>       subnet_region = var.zone
+>>       subnet_region = var.region
+>>       subnet_private_access = "true"
+>>       subnet_flow_logs = "true"
 >>     }
 >>   ]
 >> }
 >> ``` 
 > 3. Depois de escrever a configuração do módulo, inicialize o Terraform e execute a aplicação (```apply```) para criar as redes.
+> > ```
+> > terraform init
+> > terraform apply
+> > ``` 
 > 4. Em seguida, acesse o arquivo ```instances.tf``` e atualize os recursos de configuração para conectar ***tf-instance-1*** a ```subnet-01``` e ***tf-instance-2*** a ```subnet-02```.
 >>   ***Nota***: nessa configuração de instância, você vai precisar atualizar o argumento de ***rede*** para ```VPC Name``` e adicionar o argumento de ***sub-rede*** com a sub-rede certa para cada instância.
+>> ```  network_interface {
+>>          network = "< Nome fornecido no lab >"
+>>          subnetwork = "subnet-02"
+>> ```
 ## Tarefa 7: configurar um firewall
 > 1. Crie um recurso de [regra de firewall](https://registry.terraform.io/providers/hashicorp/google/latest/docs/resources/compute_firewall) chamado ***tf-firewall*** no arquivo ```main.tf```.
 > > - Essa regra de firewall deve permitir que a rede ```VPC Name``` autorize conexões de entrada em todos os intervalos de IP (```0.0.0.0/0```) na ***porta TCP 80***.
@@ -381,7 +408,7 @@ terraform init -migrate-state
 > 
 > resource "google_compute_firewall" "tf-firewall" {
 >  name    = "tf-firewall"
->  network = google_compute_network.vpc-module.name
+>  network = "projects/< Projeto fornecido no lab >/global/networks/< nome da VPC fornecida no lab >"
 >
 >  allow {
 >    protocol = "icmp"
@@ -391,12 +418,14 @@ terraform init -migrate-state
 >    protocol = "tcp"
 >    ports    = ["80"]
 >  }
->
 >  source_tags = ["web"]
-> 
->  source_ranges = [0.0.0.0/24]
+>  source_ranges = [0.0.0.0/0]
 >}
 > ```
+> > ```
+> > terraform init
+> > terraform apply
+> > ```
 ## Teste de conectividade (opcional)
 > Depois de criar uma regra de firewall para permitir conexões internas na VPC, é possível executar um teste de conectividade de rede.
 > 1. As duas VMS precisam estar em execução.
