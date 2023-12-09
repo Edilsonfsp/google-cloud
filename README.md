@@ -34,8 +34,8 @@ touch variables.tf
 mkdir modules
 cd modules
 mkdir instances
-cd intances
-touch intances.tf
+cd instances
+touch instances.tf
 touch outputs.tf
 touch variables.tf
 cd ..
@@ -87,7 +87,7 @@ terraform {
 }
 
 provider "google" {
-  version = "3.5.0"
+  version = "3.55.0"
   project = var.project_id
   region  = var.region
   zone    = var.zone
@@ -128,7 +128,7 @@ terraform init
 > # instances.tf
 > 
 > resource "google_compute_instance" "tf-instance-1" {
->    name = tf-instance-1
+>    name = "tf-instance-1"
 >    machine_type = "e2-micro"
 >    zone = var.zone
 >
@@ -148,7 +148,7 @@ terraform init
 >}
 >
 > resource "google_compute_instance" "tf-instance-2" {
->    name = tf-instance-2
+>    name = "tf-instance-2"
 >    machine_type = "e2-micro"
 >    zone = var.zone
 >
@@ -170,10 +170,10 @@ terraform init
 > - Depois de escrever as configurações do recurso no módulo, use o comando ```terraform import``` e importe essas preferências para o módulo ```instances```.
 > Execute o comando
 > ```
-> terraform import module.instances.google_compute_instance.instance-1 < Cole aqui o instance id 1>
+> terraform import module.instances.google_compute_instance.tf-instance-1 < Cole aqui o instance id 1>
 > 
-> terraform import module.instances.google_compute_instance.instance-2 $VA_PROJECT_ID/$VA_ZONE/tf-instance-2
-> terraform import module.instances.google_compute_instance.instance-2 < Cole aqui o instance id 2>
+> terraform import module.instances.google_compute_instance.tf-instance-2 qwiklabs-gcp-00-288e0c3c722f/us-east1-c/tf-instance-2
+> terraform import module.instances.google_compute_instance.tf-instance-2 < Cole aqui o instance id 2>
 > ```
 > Verifique se as instâncias foram importadas para o estado do Terraform:
 > ```
@@ -185,12 +185,10 @@ terraform init
 > ```
 > O arquivo instances.tf deverá ficar assim.
 > ```
-># Arrume o arquivo instances.tf
+># Arrume o arquivo instances.tf (Retirar se não for necessario)
 > 
 > resource "google_compute_instance" "tf-instance-1"{
 >   name         = "tf-instance-1"
-> id                        = "projects/qwiklabs-gcp-02-355d3386e37a/zones/us-east1-d/instances/tf-instance-2"
->    instance_id               = 886100697468763877
 >   machine_type = "ver no lab"
 >   zone         = var.zone
 > 
@@ -251,8 +249,8 @@ terraform init
 >> - uniform_bucket_level_access = true
 > ```
 > # Arquivo storage.tf
-> resource "google_storage_bucket" "bucket for back-end remote" {
->   name = < O nome fornecido no Lab >
+> resource "google_storage_bucket" "storage-bucket" {
+>   name = "< O nome fornecido no Lab >"
 >   location = "US"
 >   force_destroy = true
 >   uniform_bucket_level_access = true
@@ -279,7 +277,7 @@ terraform init
 >
 >  # ...
 >  backend "gcs" {
->    bucket  = < O nome fornecido no Lab >
+>    bucket  = "< O nome fornecido no Lab >"
 >    prefix  = "terraform/state"
 >  }
 > # ...
@@ -419,7 +417,7 @@ terraform init -migrate-state
 >    ports    = ["80"]
 >  }
 >  source_tags = ["web"]
->  source_ranges = [0.0.0.0/0]
+>  source_ranges = ["0.0.0.0/0"]
 >}
 > ```
 > > ```
