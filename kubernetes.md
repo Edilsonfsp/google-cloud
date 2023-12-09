@@ -50,15 +50,27 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 > No Console do Google Cloud, no ***Menu de navegação***, clique em ***Compute Engine > Instâncias de VM***.
 ## Tarefa 4: crie e configure a instância do Cloud SQL
 > Crie uma ***instância MySQL do Cloud SQL*** chamada ```griffin-dev-db``` em us-east1. Conecte-se à instância e execute os seguintes comandos SQL para preparar o ambiente do ***WordPress***:
+> No console, selecione ***Menu de navegação > SQL***.
+> 1. Clique em ***CRIAR INSTÂNCIA > Escolha MySQL*** .
+> 2. Insira o ID da instância como ```griffin-dev-db```.
+> 3. Digite uma senha forte no campo ***Senha*** (e anote!).
+> 4. Selecione a versão do banco de dados ***MySQL 8***.
+> 5. Em ***Escolher uma edição do Cloud SQL***, selecione ***Enterprise***.
+> > Em ***Predefinição***, selecione ***Desenvolvimento*** (4 vCPU, 16 GB de RAM, 100 GB de armazenamento, zona única).  
+> > ***Aviso***: se você selecionar uma predefinição maior que "Desenvolvimento", seu projeto será sinalizado e o laboratório será encerrado.
+> 6. Defina o campo ***Várias zonas*** (altamente disponíveis) como ```<Lab Region>```
+> 7. Clique em ***CRIAR INSTÂNCIA***.
+>> Observação: a criação da instância pode levar alguns minutos. Depois disso, haverá uma marca de seleção verde ao lado do nome da instância na página de instâncias de SQL.
+> 8. Clique na instância do Cloud SQL. A página Visão geral do SQL é aberta.
+> 9. Essas instruções SQL criam o banco de dados "wordpress" e um usuário com acesso a ele.
 > ```
 > mysql -u admin -p --host <Cole o end point do RDS> (Verificar a conexão na hora da criação do Cloud SQL)
-> CREATE DATABASE wordpress;
-> CREATE USER "wp_user"@"%" IDENTIFIED BY "stormwind_rules";
-> GRANT ALL PRIVILEGES ON wordpress.* TO "wp_user"@"%";
-> FLUSH PRIVILEGES;
+> MySQL [none]>CREATE DATABASE wordpress;
+> MySQL [none]>CREATE USER "wp_user"@"%" IDENTIFIED BY "stormwind_rules";
+> MySQL [none]>GRANT ALL PRIVILEGES ON wordpress.* TO "wp_user"@"%";
+> MySQL [none]>FLUSH PRIVILEGES;
 > ```
-> Essas instruções SQL criam o banco de dados "wordpress" e um usuário com acesso a ele.
-> Você usará o nome de usuário e a senha na tarefa 6.
+> > Você usará o nome de usuário: ***wp_user*** e a senha: ***stormwind_rules*** na tarefa 6.
 ## Tarefa 5. crie o cluster do Kubernetes
 > Crie um cluster com dois nós (e2-standard-4) chamado ```griffin-dev``` na sub-rede ```griffin-dev-wp``` e na zona ```us-east1-b```.
 > ```
@@ -78,7 +90,7 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 > > gsutil -m cp -r  gs://cloud-training/gsp321/wp-k8s .
 > > cd wp-k8s
 > > ```
-> > O servidor do ***WordPress*** precisa acessar o banco de dados MySQL usando o nome de usuário e a senha que você criou na tarefa 4.
+> > O servidor do ***WordPress*** precisa acessar o banco de dados MySQL usando o nome de usuário:  ***wp_user*** e a senha: ***stormwind_rules*** que você criou na tarefa 4.
 > 2. Para isso, configure os valores como secrets. O ***WordPress*** também precisa armazenar os próprios arquivos de trabalho fora do contêiner. Por isso, é necessário criar um volume.
 > 3. Adicione os secrets e o volume a seguir ao cluster usando ```wp-env.yaml```.
 > 4. Configure o nome de usuário como ```wp_user``` e a senha como ```stormwind_rules``` antes de criar a configuração.
