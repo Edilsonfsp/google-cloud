@@ -64,7 +64,8 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 > 8. Clique na instância do Cloud SQL. A página Visão geral do SQL é aberta.
 > 9. Essas instruções SQL criam o banco de dados "wordpress" e um usuário com acesso a ele.
 > ```
-> mysql -u admin -p --host <Cole o end point do RDS> (Verificar a conexão na hora da criação do Cloud SQL)
+> Tentar este mysql -u admin -p --host <Cole o end point do RDS> (Verificar a conexão na hora da criação do Cloud SQL)
+> gcloud sql conect griffin-dev-db
 > MySQL [none]>CREATE DATABASE wordpress;
 > MySQL [none]>CREATE USER "wp_user"@"%" IDENTIFIED BY "stormwind_rules";
 > MySQL [none]>GRANT ALL PRIVILEGES ON wordpress.* TO "wp_user"@"%";
@@ -74,14 +75,13 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 ## Tarefa 5. crie o cluster do Kubernetes
 > Crie um cluster com dois nós (e2-standard-4) chamado ```griffin-dev``` na sub-rede ```griffin-dev-wp``` e na zona ```us-east1-b```.
 > ```
-> 
 > gcloud container clusters create griffin-dev \
+>  --network = griffin-dev-vpc \
+>  --subnetwork = griffin-dev-wp \
 >  --machine-type e2-standard-4 \
 >  --num-nodes 2 \
->  --subnetwork = griffin-dev-wp \
 >  --location = us-east1-b
->  --scopes
-> "https://www.googleapis.com/auth/projecthosting,storage-rw"
+>  --scopes "https://www.googleapis.com/auth/projecthosting,storage-rw"
 > 
 > ```
 ## Tarefa 6. prepare o cluster do Kubernetes
@@ -112,6 +112,18 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 > > ![Tela inicial do Wordpress!](assets/wordpress_tela_inicial.png "Tela inicial de configuração do Wordpress")
 ## Tarefa 8. ative o monitoramento
 > Crie uma verificação de tempo de atividade para o site de desenvolvimento do WordPress.
+> > No Console do Google Cloud, no ***Menu de navegação***, clique em ***Monitoring > Health Check*** e clique em +Create Health check.
+> > Name field: Escolha um nome qualquer
+> > Clique next
+> > Host name: Ip externo do load balance (Pode ser conseguido pelo comando kubctl get svc -w*)
+> > path: /
+> > clique em next
+> > clique em create
 ## Tarefa 9. conceda acesso a outro engenheiro
 > Outro engenheiro entrou para a equipe e precisa ter acesso ao projeto. Conceda a ele o papel de editor no projeto.
 > A segunda conta de usuário do laboratório representa esse engenheiro.
+> No Console do Google Cloud, no ***Menu de navegação***, clique em ***IAM > IAM***.
+> > Coloque o papel de editor para User 2
+> > ```
+> >gcloud projects add-iam-policy-binding $DEVSHELL_PROJECT_ID --member=user:< cole o nome do usuario 2 do lab > --role=roles/editor
+> > ```
