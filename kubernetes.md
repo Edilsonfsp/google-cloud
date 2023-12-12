@@ -21,7 +21,7 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 - Ativar o monitoramento do cluster pelo Stackdriver
 - Conceder acesso a outro engenheiro
 ## Veja algumas normas da Jooli Inc. que você precisa seguir:
-- Crie todos os recursos na região ```us-east1``` e na zona ```us-east1-b```, a menos que haja uma instrução diferente.
+- Crie todos os recursos na região ```informada no lab``` e na zona ```informada no lab```, a menos que haja uma instrução diferente.
 - Use as VPCs do projeto.
 - Os nomes têm o formato equipe-recurso. Por exemplo, o nome de uma instância pode ser ***kraken-webserver1***.
 - Economize recursos. Como os projetos são monitorados, o uso excessivo de recursos pode levar ao encerramento desse projeto (e talvez da sua função). Por isso, tenha cuidado. Esta é a orientação da equipe de monitoramento: a menos que haja uma instrução diferente, use ```e2-medium```.
@@ -45,9 +45,19 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 > - Bloco de endereços IP: ```192.168.48.0/20```
 > - ```griffin-prod-mgmt```
 > - Bloco de endereços IP: ```192.168.64.0/20```
+> > ```
+> > gcloud compute networks create griffin-dev-vpc --subnet-mode custom
+> > gcloud compute networks subnets create griffin-dev-wp --network=griffin-dev-vpc --region <informada no lab> --range=192.168.16.0/20
+> > gcloud compute networks subnets create griffin-dev-mgmt --network=griffin-dev-vpc --region <informada no lab> --range=192.168.32.0/20
+> > ```
 ## Tarefa 3. crie um Bastion Host
 > Crie um Bastion Host com duas interfaces de rede: uma conectada a ```griffin-dev-mgmt``` e a outra a ```griffin-prod-mgmt```. Verifique se é possível estabelecer uma conexão SSH com o host.
 > No Console do Google Cloud, no ***Menu de navegação***, clique em ***Compute Engine > Instâncias de VM***.
+> > ```
+> > gcloud compute instances create bastion --network-interface=network=griffin-dev-vpc,subnet=griffin-dev-mgmt  --network-interface=network=griffin-prod-vpc,subnet=griffin-prod-mgmt --tags=ssh --zone=us-east1-b
+> > gcloud compute firewall-rules create fw-ssh-dev --source-ranges=0.0.0.0/0 --target-tags ssh --allow=tcp:22 --network=griffin-dev-vpc
+> > gcloud compute firewall-rules create fw-ssh-prod --source-ranges=0.0.0.0/0 --target-tags ssh --allow=tcp:22 --network=griffin-prod-vpc
+> > ```
 ## Tarefa 4: crie e configure a instância do Cloud SQL
 > Crie uma ***instância MySQL do Cloud SQL*** chamada ```griffin-dev-db``` em us-east1. Conecte-se à instância e execute os seguintes comandos SQL para preparar o ambiente do ***WordPress***:
 > No console, selecione ***Menu de navegação > SQL***.
@@ -61,15 +71,22 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 > 6. Defina o campo ***Várias zonas*** (altamente disponíveis) como ```<Lab Region>```
 > 7. Clique em ***CRIAR INSTÂNCIA***.
 >> Observação: a criação da instância pode levar alguns minutos. Depois disso, haverá uma marca de seleção verde ao lado do nome da instância na página de instâncias de SQL.
+> > ```
+> > # Criando por linha de comando
+> > gcloud sql instances create griffin-dev-db --root-password 12345678 --region=us-east1 --database-version=MYSQL_5_7
+> > ```
 > 8. Clique na instância do Cloud SQL. A página Visão geral do SQL é aberta.
 > 9. Essas instruções SQL criam o banco de dados "wordpress" e um usuário com acesso a ele.
 > ```
-> Tentar este mysql -u admin -p --host <Cole o end point do RDS> (Verificar a conexão na hora da criação do Cloud SQL)
+> # Digite o comando coloque a senha configurada na criação do Cloud SQL
 > gcloud sql conect griffin-dev-db
-> MySQL [none]>CREATE DATABASE wordpress;
-> MySQL [none]>CREATE USER "wp_user"@"%" IDENTIFIED BY "stormwind_rules";
-> MySQL [none]>GRANT ALL PRIVILEGES ON wordpress.* TO "wp_user"@"%";
-> MySQL [none]>FLUSH PRIVILEGES;
+>
+> # Digite os seguintes comandos na seção do Mysql
+> ***MySQL [none]>***CREATE DATABASE wordpress;
+> ***MySQL [none]>***CREATE USER "wp_user"@"%" IDENTIFIED BY "stormwind_rules";
+> ***MySQL [none]>***GRANT ALL PRIVILEGES ON wordpress.* TO "wp_user"@"%";
+> ***MySQL [none]>***FLUSH PRIVILEGES;
+> ***MySQL [none]>***Exit;
 > ```
 > > Você usará o nome de usuário: ***wp_user*** e a senha: ***stormwind_rules*** na tarefa 6.
 ## Tarefa 5. crie o cluster do Kubernetes
@@ -84,6 +101,13 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 >  --scopes "https://www.googleapis.com/auth/projecthosting,storage-rw"
 > 
 > ```
+>
+> > ```
+> > #Pegar as credenciais
+> > gcloud container clusters get-credentials griffin-dev --zone us-east1-b
+> > cd ~/
+> > gsutil cp -r gs://cloud-training/gsp321/wp-k8s .
+> > ```
 ## Tarefa 6. prepare o cluster do Kubernetes
 > 1. Use o Cloud Shell e copie todos os arquivos em ```gs://cloud-training/gsp321/wp-k8s```.
 > > ```
