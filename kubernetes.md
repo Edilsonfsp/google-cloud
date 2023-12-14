@@ -79,7 +79,7 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 > 9. Essas instruções SQL criam o banco de dados "wordpress" e um usuário com acesso a ele.
 > ```
 > # Digite o comando coloque a senha configurada na criação do Cloud SQL
-> gcloud sql conect griffin-dev-db
+> gcloud sql connect griffin-dev-db
 >
 > # Digite os seguintes comandos na seção do Mysql
 > ***MySQL [none]>***CREATE DATABASE wordpress;
