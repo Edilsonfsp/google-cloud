@@ -82,26 +82,23 @@ Você precisa ajudar a equipe com algumas tarefas iniciais de um novo projeto. E
 > gcloud sql connect griffin-dev-db
 >
 > # Digite os seguintes comandos na seção do Mysql
-> ***MySQL [none]>***CREATE DATABASE wordpress;
-> ***MySQL [none]>***CREATE USER "wp_user"@"%" IDENTIFIED BY "stormwind_rules";
-> ***MySQL [none]>***GRANT ALL PRIVILEGES ON wordpress.* TO "wp_user"@"%";
-> ***MySQL [none]>***FLUSH PRIVILEGES;
-> ***MySQL [none]>***Exit;
+> MySQL [none]>CREATE DATABASE wordpress;
+> MySQL [none]>CREATE USER "wp_user"@"%" IDENTIFIED BY "stormwind_rules";
+> MySQL [none]>GRANT ALL PRIVILEGES ON wordpress.* TO "wp_user"@"%";
+> MySQL [none]>FLUSH PRIVILEGES;
+> MySQL [none]>Exit;
 > ```
 > > Você usará o nome de usuário: ***wp_user*** e a senha: ***stormwind_rules*** na tarefa 6.
 ## Tarefa 5. crie o cluster do Kubernetes
 > Crie um cluster com dois nós (e2-standard-4) chamado ```griffin-dev``` na sub-rede ```griffin-dev-wp``` e na zona ```us-east1-b```.
 > ```
 > gcloud container clusters create griffin-dev \
->  --network = griffin-dev-vpc \
->  --subnetwork = griffin-dev-wp \
+>  --network griffin-dev-vpc \
+>  --subnetwork griffin-dev-wp \
 >  --machine-type e2-standard-4 \
 >  --num-nodes 2 \
->  --location = us-east1-b
->  --scopes "https://www.googleapis.com/auth/projecthosting,storage-rw"
-> 
+>  --location us-east1-b> 
 > ```
->
 > > ```
 > > #Pegar as credenciais
 > > gcloud container clusters get-credentials griffin-dev --zone us-east1-b
